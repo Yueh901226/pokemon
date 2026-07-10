@@ -25,6 +25,21 @@ export const regionalFormsMap = {
       146: 10171, 199: 10172, 222: 10173, 263: 10174, 264: 10175,
       554: 10176, 555: 10178, 562: 10179, 618: 10180
     }
+  },
+  za: {
+    nameSuffix: ' (洗翠的樣子)',
+    forms: {
+      211: 10234, 215: 10235, 705: 10241, 706: 10242, 713: 10243
+    }
+  },
+  alola: {
+    nameSuffix: ' (阿羅拉的樣子)',
+    forms: {
+      19: 10091, 20: 10092, 26: 10100, 27: 10101, 28: 10102,
+      37: 10103, 38: 10104, 50: 10105, 51: 10106, 52: 10107,
+      53: 10108, 74: 10109, 75: 10110, 76: 10111, 88: 10112,
+      89: 10113, 103: 10114, 105: 10115
+    }
   }
 };
 
@@ -196,19 +211,11 @@ export const gamePokedexConfig = [
     ]
   },
   {
-    id: 'sv',
-    name: '朱／紫',
+    id: 'lgpe',
+    name: 'Let\'s Go！皮卡丘／伊布',
     pokedexes: [
-      { id: 'paldea', name: '帕底亞圖鑑', value: 'paldea' },
-      { id: 'kitakami', name: '北上鄉圖鑑', value: 'kitakami' },
-      { id: 'blueberry', name: '藍之圓盤圖鑑', value: 'blueberry' }
-    ]
-  },
-  {
-    id: 'la',
-    name: '傳說 阿爾宙斯',
-    pokedexes: [
-      { id: 'hisui', name: '洗翠圖鑑', value: 'hisui' }
+      { id: 'letsgo-kanto', name: '關都圖鑑', value: 'letsgo-kanto' },
+      { id: 'national', name: '全國圖鑑', value: 'national' }
     ]
   },
   {
@@ -225,16 +232,23 @@ export const gamePokedexConfig = [
     pokedexes: [
       { id: 'galar', name: '伽勒爾圖鑑', value: 'galar' },
       { id: 'isle-of-armor', name: '鎧島圖鑑', value: 'isle-of-armor' },
-      { id: 'crown-tundra', name: '冠之雪原圖鑑', value: 'crown-tundra' },
-      { id: 'national', name: '全國圖鑑', value: 'national' }
+      { id: 'crown-tundra', name: '冠之雪原圖鑑', value: 'crown-tundra' }
     ]
   },
   {
-    id: 'lgpe',
-    name: 'Let\'s Go！皮卡丘／伊布',
+    id: 'sv',
+    name: '朱／紫',
     pokedexes: [
-      { id: 'letsgo-kanto', name: '關都圖鑑', value: 'letsgo-kanto' },
-      { id: 'national', name: '全國圖鑑', value: 'national' }
+      { id: 'paldea', name: '帕底亞圖鑑', value: 'paldea' },
+      { id: 'kitakami', name: '北上鄉圖鑑', value: 'kitakami' },
+      { id: 'blueberry', name: '藍之圓盤圖鑑', value: 'blueberry' }
+    ]
+  },
+  {
+    id: 'la',
+    name: '傳說 阿爾宙斯',
+    pokedexes: [
+      { id: 'hisui', name: '洗翠圖鑑', value: 'hisui' }
     ]
   },
   {

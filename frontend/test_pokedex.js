@@ -1,5 +1,5 @@
-import { megaEvolutionList, parseEvolutionDetails, regionalFormsMap } from './helpers';
-import { otherdimensionPokedex, pokemonChineseNames } from './pokemonNames';
+const regionalFormsMap = { za: { nameSuffix: ' (洗翠的樣子)', forms: { 211: 10234, 215: 10235, 705: 10241, 706: 10242, 713: 10243 } } }; const pokemonChineseNames = {25: '皮卡丘', 26: '雷丘'}; const parseEvolutionDetails = () => ''; const cacheGet = () => null; const cacheSet = () => null; const megaEvolutionList = []; const otherdimensionPokedex = [];
+const regionalFormsMap = { za: { nameSuffix: ' (洗翠的樣子)', forms: { 211: 10234, 215: 10235, 705: 10241, 706: 10242, 713: 10243 } } }; const pokemonChineseNames = {25: '皮卡丘', 26: '雷丘'}; const parseEvolutionDetails = () => ''; const cacheGet = () => null; const cacheSet = () => null; const megaEvolutionList = []; const otherdimensionPokedex = [];
 
 const regionalInsertions = {
   20: [10091, 10092],
@@ -44,16 +44,6 @@ const regionalInsertions = {
 const movedEvolutions = new Set([862, 863, 864, 865, 866, 867, 902, 903, 904, 980]);
 
 const createRegionalEntry = (id, baseId) => {
-  if (pokemonChineseNames[id]) {
-    return {
-      id: id,
-      baseId: baseId,
-      name: `pokemon-${id}`,
-      chineseName: pokemonChineseNames[id],
-      image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`
-    };
-  }
-
   let suffix = '';
   for (const game in regionalFormsMap) {
     const mapping = regionalFormsMap[game];
@@ -78,54 +68,7 @@ const createRegionalEntry = (id, baseId) => {
   };
 };
 
-const isFormAllowedInGame = (id, selectedGame) => {
-  if (selectedGame === 'all') return true;
-  if (selectedGame === 'bdsp') return false;
-
-  const uniqueEvolutionGames = {
-    862: ['ss', 'sv'], // Obstagoon
-    863: ['ss', 'sv'], // Perrserker
-    864: ['ss', 'sv'], // Cursola
-    865: ['ss', 'sv'], // Sirfetch'd
-    866: ['ss', 'sv'], // Mr. Rime
-    867: ['ss', 'sv'], // Runerigus
-    902: ['la', 'sv'], // Basculegion
-    903: ['la', 'sv'], // Sneasler
-    904: ['la', 'sv', 'za'], // Overqwil
-    980: ['sv'] // Clodsire
-  };
-
-  if (uniqueEvolutionGames[id]) {
-    return uniqueEvolutionGames[id].includes(selectedGame);
-  }
-
-  if (id < 10000) return true;
-
-  const isAlolan = id >= 10091 && id <= 10115;
-  const isGalarian = id >= 10161 && id <= 10180;
-  const isHisuian = (id >= 10229 && id <= 10244) || id === 10247;
-  const isPaldean = id >= 10250 && id <= 10253;
-
-  if (selectedGame === 'la') {
-    return isHisuian || id === 10103 || id === 10104;
-  }
-  if (selectedGame === 'ss') {
-    return isGalarian || isAlolan;
-  }
-  if (selectedGame === 'lgpe') {
-    return isAlolan;
-  }
-  if (selectedGame === 'sv') {
-    return isAlolan || isGalarian || isHisuian || isPaldean;
-  }
-  return true;
-};
-
 const organizePokedexList = (list, selectedGame) => {
-  if (selectedGame === 'bdsp') {
-    return list;
-  }
-
   const itemMap = {};
   list.forEach(p => {
     itemMap[p.id] = p;
@@ -147,14 +90,8 @@ const organizePokedexList = (list, selectedGame) => {
           return;
         }
 
-        if (!isFormAllowedInGame(insertId, selectedGame)) {
-          return;
-        }
-
         if (itemMap[insertId]) {
-          if (movedEvolutions.has(insertId)) {
-            newList.push(itemMap[insertId]);
-          }
+          newList.push(itemMap[insertId]);
         } else {
           let baseId = lookupKey;
           for (const game in regionalFormsMap) {
@@ -166,11 +103,7 @@ const organizePokedexList = (list, selectedGame) => {
               }
             }
           }
-          const entry = createRegionalEntry(insertId, baseId);
-          entry.entryNumber = (itemMap[baseId] && itemMap[baseId].entryNumber !== undefined)
-            ? itemMap[baseId].entryNumber
-            : p.entryNumber;
-          newList.push(entry);
+          newList.push(createRegionalEntry(insertId, baseId));
         }
       });
     }
@@ -205,8 +138,8 @@ const cacheSet = (key, data) => {
   }
 };
 
-export const fetchAllPokemonList = async (selectedGame = 'all') => {
-  const cacheKey = `all_pokemon_list_${selectedGame}_v14`;
+const fetchAllPokemonList = async (selectedGame = 'all') => {
+  const cacheKey = `all_pokemon_list_${selectedGame}_v6`;
   const cached = cacheGet(cacheKey);
   if (cached) return cached;
 
@@ -227,7 +160,7 @@ export const fetchAllPokemonList = async (selectedGame = 'all') => {
 
       if (regionalMapping && regionalMapping.forms[baseId]) {
         displayId = regionalMapping.forms[baseId];
-        chineseName = pokemonChineseNames[displayId] || ((pokemonChineseNames[baseId] || p.name) + regionalMapping.nameSuffix);
+        chineseName = (pokemonChineseNames[baseId] || p.name) + regionalMapping.nameSuffix;
       }
 
       return {
@@ -241,6 +174,9 @@ export const fetchAllPokemonList = async (selectedGame = 'all') => {
     });
 
     processedList = organizePokedexList(processedList, selectedGame);
+    processedList.forEach((p, idx) => {
+      p.entryNumber = idx + 1;
+    });
 
     cacheSet(cacheKey, processedList);
     return processedList;
@@ -250,7 +186,7 @@ export const fetchAllPokemonList = async (selectedGame = 'all') => {
   }
 };
 
-export const fetchPokemonDetails = async (idOrName) => {
+const fetchPokemonDetails = async (idOrName) => {
   const cacheKey = `pokemon_detail_${idOrName}`;
   const cached = cacheGet(cacheKey);
   if (cached && cached.speciesId) return cached;
@@ -290,7 +226,7 @@ export const fetchPokemonDetails = async (idOrName) => {
   }
 };
 
-export const fetchPokemonSpecies = async (id) => {
+const fetchPokemonSpecies = async (id) => {
   const cacheKey = `pokemon_species_${id}`;
   const cached = cacheGet(cacheKey);
   if (cached && cached.varieties) return cached;
@@ -354,7 +290,7 @@ export const fetchPokemonSpecies = async (id) => {
   }
 };
 
-export const fetchPokemonEncounters = async (id) => {
+const fetchPokemonEncounters = async (id) => {
   const cacheKey = `encounters_${id}_v1`;
   const cached = cacheGet(cacheKey);
   if (cached) return cached;
@@ -371,7 +307,7 @@ export const fetchPokemonEncounters = async (id) => {
   }
 };
 
-export const fetchEvolutionChain = async (url, selectedGame = 'all') => {
+const fetchEvolutionChain = async (url, selectedGame = 'all') => {
   if (!url) return null;
   const parts = url.split('/').filter(Boolean);
   const chainId = parts[parts.length - 1];
@@ -630,7 +566,7 @@ export const fetchEvolutionChain = async (url, selectedGame = 'all') => {
   }
 };
 
-export const fetchPokemonByType = async (typeName) => {
+const fetchPokemonByType = async (typeName) => {
   const cacheKey = `pokemon_type_${typeName}_v2`;
   const cached = cacheGet(cacheKey);
   if (cached) return cached;
@@ -658,7 +594,7 @@ export const fetchPokemonByType = async (typeName) => {
   }
 };
 
-export const fetchPokedex = async (pokedexName, selectedGame = 'all') => {
+const fetchPokedex = async (pokedexName, selectedGame = 'all') => {
   if (pokedexName === 'mega') {
     return megaEvolutionList.map((p, index) => ({
       id: p.id,
@@ -682,7 +618,7 @@ export const fetchPokedex = async (pokedexName, selectedGame = 'all') => {
     }));
   }
 
-  const cacheKey = `pokedex_list_${pokedexName}_${selectedGame}_v14`;
+  const cacheKey = `pokedex_list_${pokedexName}_${selectedGame}_v5`;
   const cached = cacheGet(cacheKey);
   if (cached) return cached;
 
@@ -696,7 +632,7 @@ export const fetchPokedex = async (pokedexName, selectedGame = 'all') => {
 
     if (regionalMapping && regionalMapping.forms[id]) {
       displayId = regionalMapping.forms[id];
-      chineseName = pokemonChineseNames[displayId] || ((pokemonChineseNames[id] || baseName) + regionalMapping.nameSuffix);
+      chineseName = (pokemonChineseNames[id] || baseName) + regionalMapping.nameSuffix;
     }
 
     return {
@@ -730,6 +666,9 @@ export const fetchPokedex = async (pokedexName, selectedGame = 'all') => {
 
       let list = Array.from(mergedMap.values());
       list = organizePokedexList(list, selectedGame);
+      list.forEach((p, idx) => {
+        p.entryNumber = idx + 1;
+      });
       cacheSet(cacheKey, list);
       return list;
     } catch (error) {
@@ -750,6 +689,9 @@ export const fetchPokedex = async (pokedexName, selectedGame = 'all') => {
     }).filter(p => p.baseId <= 1025);
 
     list = organizePokedexList(list, selectedGame);
+    list.forEach((p, idx) => {
+      p.entryNumber = idx + 1;
+    });
 
     cacheSet(cacheKey, list);
     return list;
@@ -758,3 +700,5 @@ export const fetchPokedex = async (pokedexName, selectedGame = 'all') => {
     return [];
   }
 };
+
+fetchPokedex('lumiose-city', 'za').then(list => console.log(list.filter(p => p.id === 10100 || p.baseId === 26)));

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import { fetchPokemonDetails, fetchPokemonSpecies, fetchEvolutionChain } from '../utils/pokeapi';
-import { typeTranslations, statTranslations, capitalize, getStatColorClass, getStatProgressBg, megaEvolutionList } from '../utils/helpers';
+import { typeTranslations, statTranslations, capitalize, getStatColorClass, getStatProgressBg, megaEvolutionList, regionalFormsMap } from '../utils/helpers';
 import { pokemonChineseNames } from '../utils/pokemonNames';
 import encountersData from '../assets/encounters.json';
 
@@ -93,7 +93,8 @@ watch(() => props.pokemonId, (newId) => {
 });
 
 const formattedId = computed(() => {
-  return `#${String(details.value?.id || props.pokemonId).padStart(3, '0')}`;
+  const idToFormat = details.value?.speciesId || details.value?.id || props.pokemonId;
+  return `#${String(idToFormat).padStart(3, '0')}`;
 });
 
 const primaryType = computed(() => {
@@ -102,6 +103,11 @@ const primaryType = computed(() => {
 
 const speciesName = computed(() => {
   if (!details.value) return '';
+
+  if (pokemonChineseNames[details.value.id]) {
+    return pokemonChineseNames[details.value.id];
+  }
+
   const megaInfo = megaEvolutionList.find(m => m.id === details.value.id);
   if (megaInfo) return megaInfo.displayName;
   
@@ -117,8 +123,24 @@ const speciesName = computed(() => {
     let varietySuffix = formatVarietyName(rawSuffix).replace(' (預設)', '').replace(' (標準)', '');
     return varietySuffix ? `超級${baseTraditionalName} (${varietySuffix})` : `超級${baseTraditionalName}`;
   }
-  
-  return pokemonChineseNames[details.value.id] || species.value?.chineseName || capitalize(details.value.name);
+
+  // Check regional forms map to append appropriate suffix
+  let suffix = '';
+  for (const game in regionalFormsMap) {
+    const mapping = regionalFormsMap[game];
+    for (const bid in mapping.forms) {
+      if (mapping.forms[bid] === details.value.id) {
+        suffix = mapping.nameSuffix;
+        break;
+      }
+    }
+    if (suffix) break;
+  }
+
+  const baseId = details.value.speciesId || details.value.id;
+  const baseChineseName = pokemonChineseNames[baseId] || species.value?.chineseName || capitalize(details.value.name);
+
+  return baseChineseName + suffix;
 });
 
 const cleanEnglishName = computed(() => {
@@ -315,6 +337,11 @@ const totalStats = computed(() => {
   return details.value.stats.reduce((acc, stat) => acc + stat.value, 0);
 });
 
+const maxStatValue = computed(() => {
+  if (!details.value || !details.value.stats) return 0;
+  return Math.max(...details.value.stats.map(s => s.value));
+});
+
 const isMega = computed(() => {
   if (!details.value) return false;
   return megaEvolutionList.some(m => m.id === details.value.id) || (details.value.name && details.value.name.toLowerCase().includes('-mega'));
@@ -463,7 +490,7 @@ const modalThemeStyle = computed(() => {
                       查看 52poke 完整圖鑑 ↗
                     </a>
                   </span>
-                  <div v-if="encounters.length > 0" class="encounters-list custom-scroll" style="max-height: 80px; overflow-y: auto; padding-right: 4px;">
+                  <div v-if="encounters.length > 0" class="encounters-list custom-scroll" style="max-height: 200px; overflow-y: auto; padding-right: 4px;">
                     <div v-for="(loc, idx) in encounters" :key="idx" class="encounter-badge">
                       {{ loc }}
                     </div>
@@ -505,8 +532,11 @@ const modalThemeStyle = computed(() => {
                   v-for="s in details.stats" 
                   :key="s.name" 
                   class="stat-row"
+                  :class="{ 'stat-highlight': s.value === maxStatValue }"
                 >
-                  <span class="stat-name">{{ statTranslations[s.name] || capitalize(s.name) }}</span>
+                  <span class="stat-name">
+                    {{ statTranslations[s.name] || capitalize(s.name) }}
+                  </span>
                   <span class="stat-value">{{ s.value }}</span>
                   <div class="stat-bar-container" :style="{ backgroundColor: getStatProgressBg(s.value) }">
                     <div 
@@ -605,7 +635,7 @@ const modalThemeStyle = computed(() => {
 
 .modal-content {
   width: 100%;
-  max-width: 850px;
+  max-width: 1000px;
   border-radius: 28px;
   overflow: hidden;
   position: relative;
@@ -790,7 +820,7 @@ const modalThemeStyle = computed(() => {
 
 .tabs-content {
   flex-grow: 1;
-  max-height: 250px;
+  max-height: 450px;
   overflow-y: auto;
 }
 
@@ -925,6 +955,33 @@ const modalThemeStyle = computed(() => {
   font-size: 0.95rem;
   font-weight: 700;
   text-align: right;
+}
+
+.stat-row.stat-highlight .stat-name {
+  color: #ffd700;
+  font-weight: 800;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+}
+
+.stat-row.stat-highlight .stat-value {
+  color: #ffd700;
+  font-weight: 800;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+}
+
+.stat-row.stat-highlight .stat-bar {
+  animation: pulse-glow 2s infinite alternate;
+}
+
+@keyframes pulse-glow {
+  0% {
+    filter: brightness(1) saturate(1);
+    box-shadow: 0 0 8px var(--btn-color);
+  }
+  100% {
+    filter: brightness(1.25) saturate(1.2);
+    box-shadow: 0 0 16px var(--btn-color), 0 0 4px #ffffff;
+  }
 }
 
 .stat-bar-container {

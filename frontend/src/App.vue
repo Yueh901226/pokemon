@@ -18,6 +18,7 @@ const loadingMore = ref(false);
 
 const searchQuery = ref('');
 const selectedType = ref(localStorage.getItem('pokedex_selected_type') || '');
+const selectedType2 = ref(localStorage.getItem('pokedex_selected_type2') || '');
 const selectedGen = ref(localStorage.getItem('pokedex_selected_gen') || 'all');
 const sortBy = ref(localStorage.getItem('pokedex_selected_sort') || 'id-asc');
 const showFavoritesOnly = ref(localStorage.getItem('pokedex_selected_favorites') === 'true');
@@ -208,6 +209,19 @@ watch(selectedType, async (newType) => {
   loading.value = false;
 });
 
+const typeFilteredList2 = ref(null);
+watch(selectedType2, async (newType) => {
+  localStorage.setItem('pokedex_selected_type2', newType || '');
+  loading.value = true;
+  if (newType) {
+    typeFilteredList2.value = await fetchPokemonByType(newType);
+  } else {
+    typeFilteredList2.value = null;
+  }
+  resetPagination();
+  loading.value = false;
+});
+
 // Watch filtering states to recalculate list
 watch([searchQuery, selectedGen, sortBy, showFavoritesOnly, showUncaughtOnly, caught], () => {
   localStorage.setItem('pokedex_selected_gen', selectedGen.value);
@@ -224,14 +238,19 @@ const finalFilteredList = computed(() => {
   // If type filter is active, filter the list by type
   if (selectedType.value && typeFilteredList.value) {
     const typeIds = new Set(typeFilteredList.value.map(p => p.id));
-    list = list.filter(p => typeIds.has(p.id));
+    if (selectedType2.value && typeFilteredList2.value) {
+      const type2Ids = new Set(typeFilteredList2.value.map(p => p.id));
+      list = list.filter(p => typeIds.has(p.id) && type2Ids.has(p.id));
+    } else {
+      list = list.filter(p => typeIds.has(p.id));
+    }
   }
 
   // 2. Filter by Generation Boundaries (Only when on "All Games" National Pokedex)
   if (selectedGame.value === 'all') {
     const genConfig = generations.find(g => g.value === selectedGen.value);
     if (genConfig && selectedGen.value !== 'all') {
-      list = list.filter(p => p.id >= genConfig.start && p.id <= genConfig.end);
+      list = list.filter(p => (p.baseId || p.id) >= genConfig.start && (p.baseId || p.id) <= genConfig.end);
     }
   }
 
@@ -260,7 +279,7 @@ const finalFilteredList = computed(() => {
 
   // 5. Sorting
   const sorted = [...list];
-  const useEntryNumber = activePokedexList.value && selectedPokedex.value !== 'national';
+  const useEntryNumber = list.length > 0 && list[0].entryNumber !== undefined;
 
   if (sortBy.value === 'id-asc') {
     if (useEntryNumber) {
@@ -374,6 +393,9 @@ onMounted(async () => {
   if (selectedType.value) {
     typeFilteredList.value = await fetchPokemonByType(selectedType.value);
   }
+  if (selectedType2.value) {
+    typeFilteredList2.value = await fetchPokemonByType(selectedType2.value);
+  }
 
   resetPagination();
   loading.value = false;
@@ -405,6 +427,7 @@ const closeDetail = () => {
     <Header 
       v-model:searchQuery="searchQuery"
       v-model:selectedType="selectedType"
+      v-model:selectedType2="selectedType2"
       v-model:selectedGen="selectedGen"
       v-model:sortBy="sortBy"
       v-model:showFavoritesOnly="showFavoritesOnly"

@@ -93,7 +93,8 @@ const formattedId = computed(() => {
   if (props.displayNumber !== null && props.displayNumber !== undefined) {
     return `#${String(props.displayNumber).padStart(3, '0')}`;
   }
-  return `#${String(props.pokemon.id).padStart(3, '0')}`;
+  const idToFormat = props.pokemon.baseId || props.pokemon.id;
+  return `#${String(idToFormat).padStart(3, '0')}`;
 });
 
 const primaryType = computed(() => {

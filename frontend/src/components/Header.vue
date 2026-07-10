@@ -5,6 +5,7 @@ import { typeTranslations, generations, gamePokedexConfig } from '../utils/helpe
 const props = defineProps({
   searchQuery: String,
   selectedType: String,
+  selectedType2: String,
   selectedGen: String,
   sortBy: String,
   showFavoritesOnly: Boolean,
@@ -18,6 +19,7 @@ const props = defineProps({
 const emit = defineEmits([
   'update:searchQuery',
   'update:selectedType',
+  'update:selectedType2',
   'update:selectedGen',
   'update:sortBy',
   'update:showFavoritesOnly',
@@ -28,11 +30,21 @@ const emit = defineEmits([
   'toggleCompare'
 ]);
 
-const activeType = ref(props.selectedType || '');
-
 const selectType = (typeKey) => {
-  activeType.value = activeType.value === typeKey ? '' : typeKey;
-  emit('update:selectedType', activeType.value);
+  if (props.selectedType === typeKey) {
+    emit('update:selectedType', '');
+    emit('update:selectedType2', '');
+  } else {
+    emit('update:selectedType', typeKey);
+  }
+};
+
+const selectType2 = (typeKey) => {
+  if (props.selectedType2 === typeKey) {
+    emit('update:selectedType2', '');
+  } else {
+    emit('update:selectedType2', typeKey);
+  }
 };
 
 const handleSearch = (e) => {
@@ -80,26 +92,26 @@ const selectPokedex = (pokedexValue) => {
       <div class="header-container">
         <div class="logo-section">
           <div class="pokeball-icon animate-spin-slow"></div>
-          <h1 class="logo-text text-gradient">寶可夢 Pokedex</h1>
+          <h1 class="logo-text text-gradient">寶可夢圖鑑輔助</h1>
+        </div>
+
+        <!-- Search bar (Moved to center and grow) -->
+        <div class="search-wrapper">
+          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input 
+            type="text" 
+            :value="searchQuery"
+            @input="handleSearch"
+            placeholder="搜尋名稱或編號..." 
+            class="search-input"
+          />
         </div>
 
         <!-- Controls Panel -->
         <div class="controls-panel">
-          <!-- Search bar -->
-          <div class="search-wrapper">
-            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            <input 
-              type="text" 
-              :value="searchQuery"
-              @input="handleSearch"
-              placeholder="搜尋名稱或編號..." 
-              class="search-input"
-            />
-          </div>
-
           <div class="filters-row">
             <!-- Generation filter (Only show when on "All Games" National Pokedex) -->
-            <div class="select-wrapper" v-if="selectedGame === 'all'">
+            <div class="select-wrapper" :style="{ visibility: selectedGame === 'all' ? 'visible' : 'hidden' }">
               <select :value="selectedGen" @change="handleGenChange" class="filter-select">
                 <option v-for="gen in generations" :key="gen.value" :value="gen.value">
                   {{ gen.name }}
@@ -154,41 +166,41 @@ const selectPokedex = (pokedexValue) => {
       </div>
     </div>
 
-    <!-- Row 2: Game Selector Bar -->
+    <!-- Row 2: Game and Pokedex Selector Bar -->
     <div class="game-select-bar">
       <div class="game-container custom-scroll">
-        <span class="game-label">遊戲版本：</span>
-        <div class="games-list">
-          <button 
-            v-for="game in gamePokedexConfig" 
-            :key="game.id"
-            class="game-pill"
-            :class="{ 'active': selectedGame === game.id }"
-            @click="selectGame(game.id)"
-          >
-            {{ game.name }}
-          </button>
+        <div class="game-section-inline">
+          <span class="game-label">遊戲版本：</span>
+          <div class="games-list">
+            <template v-for="(game, index) in gamePokedexConfig" :key="game.id">
+              <div v-if="index === 1" class="game-separator">|</div>
+              <div v-if="index === 5" class="game-separator">|</div>
+              <button 
+                class="game-pill"
+                :class="{ 'active': selectedGame === game.id }"
+                @click="selectGame(game.id)"
+              >
+                {{ game.name }}
+              </button>
+            </template>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Row 3: Sub Pokedex Tab Bar (Shown if the game has multiple pokedexes) -->
-    <div 
-      class="pokedex-tabs-bar"
-      v-if="activeGameConfig && activeGameConfig.pokedexes.length > 1"
-    >
-      <div class="tabs-container custom-scroll">
-        <span class="pokedex-label">選擇圖鑑：</span>
-        <div class="tabs-list">
-          <button 
-            v-for="dex in activeGameConfig.pokedexes" 
-            :key="dex.value"
-            class="dex-tab"
-            :class="{ 'active': selectedPokedex === dex.value }"
-            @click="selectPokedex(dex.value)"
-          >
-            {{ dex.name }}
-          </button>
+        <div class="inline-divider" v-if="activeGameConfig && activeGameConfig.pokedexes.length >= 1"></div>
+
+        <div class="pokedex-section-inline" v-if="activeGameConfig && activeGameConfig.pokedexes.length >= 1">
+          <span class="pokedex-label">選擇圖鑑：</span>
+          <div class="tabs-list">
+            <button 
+              v-for="dex in activeGameConfig.pokedexes" 
+              :key="dex.value"
+              class="dex-tab"
+              :class="{ 'active': selectedPokedex === dex.value }"
+              @click="selectPokedex(dex.value)"
+            >
+              {{ dex.name }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -201,7 +213,7 @@ const selectPokedex = (pokedexValue) => {
           :key="key" 
           @click="selectType(key)"
           class="type-btn"
-          :class="[`type-${key}`, { 'active': activeType === key, 'inactive': activeType && activeType !== key }]"
+          :class="[`type-${key}`, { 'active': selectedType === key, 'inactive': selectedType && selectedType !== key }]"
           :style="{ '--btn-color': info.color }"
         >
           <span class="type-dot"></span>
@@ -209,6 +221,36 @@ const selectPokedex = (pokedexValue) => {
         </button>
       </div>
     </div>
+
+    <!-- Types Scrollbar 2 (Secondary Type) -->
+    <Transition name="slide-fade">
+      <div class="types-bar custom-scroll secondary-types-bar" v-if="selectedType">
+        <div class="types-bar-container">
+          <button
+            @click="selectType2('')"
+            class="type-btn type-none"
+            :class="{ 'active': !selectedType2, 'inactive': selectedType2 }"
+            style="--btn-color: #888888"
+          >
+            <span class="type-dot"></span>
+            無副屬性
+          </button>
+
+          <button 
+            v-for="(info, key) in typeTranslations" 
+            :key="key" 
+            v-show="key !== selectedType"
+            @click="selectType2(key)"
+            class="type-btn"
+            :class="[`type-${key}`, { 'active': selectedType2 === key, 'inactive': selectedType2 && selectedType2 !== key }]"
+            :style="{ '--btn-color': info.color }"
+          >
+            <span class="type-dot"></span>
+            {{ info.name }}
+          </button>
+        </div>
+      </div>
+    </Transition>
   </header>
 </template>
 
@@ -279,22 +321,30 @@ const selectPokedex = (pokedexValue) => {
 
 .controls-panel {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
   gap: 12px;
-  flex-grow: 1;
-  max-width: 850px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none; /* Hide scrollbar for Firefox */
+  flex-shrink: 0;
 }
 
-@media (min-width: 768px) {
-  .controls-panel {
-    flex-direction: row;
-    align-items: center;
-  }
+.controls-panel::-webkit-scrollbar {
+  display: none; /* Hide scrollbar for Chrome/Safari */
 }
 
 .search-wrapper {
   position: relative;
   flex-grow: 1;
+  max-width: 480px;
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .search-wrapper {
+    margin: 0 32px;
+  }
 }
 
 .search-icon {
@@ -329,7 +379,8 @@ const selectPokedex = (pokedexValue) => {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
 }
 
 .select-wrapper {
@@ -479,9 +530,39 @@ const selectPokedex = (pokedexValue) => {
   max-width: 100%;
   padding: 0 24px;
   display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  scrollbar-width: none; /* Hide scrollbar for Firefox */
+}
+
+.game-container::-webkit-scrollbar {
+  display: none; /* Hide scrollbar for Chrome/Safari */
+}
+
+.game-section-inline {
+  display: flex;
   align-items: center;
   gap: 12px;
-  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+.inline-divider {
+  width: 1px;
+  height: 20px;
+  background-color: var(--border-color);
+  opacity: 0.6;
+  flex-shrink: 0;
+  margin: 0 16px;
+}
+
+.pokedex-section-inline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
 .game-label {
@@ -494,6 +575,18 @@ const selectPokedex = (pokedexValue) => {
 .games-list {
   display: flex;
   gap: 8px;
+  align-items: center;
+}
+
+.game-separator {
+  color: var(--border-color);
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  margin: 0 4px;
+  user-select: none;
+  font-size: 0.9rem;
+  opacity: 0.6;
 }
 
 .game-pill {
@@ -519,22 +612,6 @@ const selectPokedex = (pokedexValue) => {
   border-color: var(--primary-color);
   color: #ffffff;
   box-shadow: 0 0 10px var(--primary-glow);
-}
-
-/* Row 3: Sub Pokedex Tab Bar Styling */
-.pokedex-tabs-bar {
-  border-top: 1px solid var(--border-color);
-  padding: 10px 0;
-  background-color: rgba(255, 255, 255, 0.01);
-}
-
-.tabs-container {
-  max-width: 100%;
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  overflow-x: auto;
 }
 
 .pokedex-label {
@@ -628,5 +705,40 @@ const selectPokedex = (pokedexValue) => {
   opacity: 1;
   filter: none;
   transform: translateY(-2px);
+}
+
+.secondary-types-bar {
+  border-top: 1px solid var(--border-color);
+  background-color: rgba(0, 0, 0, 0.02);
+  padding: 8px 24px;
+  max-height: 60px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  max-height: 0px !important;
+  opacity: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  border-top-color: transparent !important;
+}
+
+.type-none {
+  background-color: var(--bg-input) !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+  text-shadow: none !important;
+}
+
+.type-none .type-dot {
+  background-color: #888888 !important;
+  box-shadow: none !important;
+}
+
+.type-none.active {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--text-secondary) !important;
 }
 </style>
