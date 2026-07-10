@@ -29,7 +29,6 @@ const activePokedexList = ref(null);
 
 const favorites = ref(new Set());
 const caught = ref({});
-const pendingCaught = ref(new Set());
 const showUncaughtOnly = ref(false);
 const selectedPokemonId = ref(null);
 const theme = ref('dark');
@@ -108,12 +107,8 @@ watch(caughtStorageKey, () => {
 const toggleCaught = (id) => {
   if (caught.value[id]) {
     delete caught.value[id];
-    pendingCaught.value.delete(id);
   } else {
     caught.value[id] = true;
-    if (showUncaughtOnly.value) {
-      pendingCaught.value.add(id);
-    }
   }
   // Trigger reactivity
   caught.value = { ...caught.value };
@@ -203,8 +198,7 @@ watch(selectedType2, async (newType) => {
 });
 
 // Watch filtering states to recalculate list
-watch([searchQuery, selectedGen, sortBy, showFavoritesOnly, showUncaughtOnly, selectedGame, selectedPokedex, selectedType, selectedType2], () => {
-  pendingCaught.value.clear();
+watch([searchQuery, selectedGen, sortBy, showFavoritesOnly, showUncaughtOnly, selectedGame, selectedPokedex, selectedType, selectedType2, caught], () => {
   localStorage.setItem('pokedex_selected_gen', selectedGen.value);
   localStorage.setItem('pokedex_selected_sort', sortBy.value);
   localStorage.setItem('pokedex_selected_favorites', String(showFavoritesOnly.value));
@@ -255,7 +249,7 @@ const finalFilteredList = computed(() => {
 
   // 5. Filter by Uncaught Only
   if (showUncaughtOnly.value) {
-    list = list.filter(p => !caught.value[p.id] || pendingCaught.value.has(p.id));
+    list = list.filter(p => !caught.value[p.id]);
   }
 
   // 5. Sorting
@@ -437,17 +431,19 @@ const closeDetail = () => {
         <!-- Pokemon Grid List -->
         <div v-else class="pokemon-grid-container">
           <div class="pokemon-grid">
-            <PokemonCard 
-              v-for="poke in displayedList" 
-              :key="poke.id" 
-              :pokemon="poke"
-              :isFavorite="favorites.has(poke.id)"
-              :isCaught="!!caught[poke.id]"
-              :displayNumber="selectedPokedex !== 'national' ? poke.entryNumber : null"
-              @click="openDetail"
-              @toggleFavorite="toggleFavorite"
-              @toggleCaught="toggleCaught"
-            />
+            <TransitionGroup name="grid-list">
+              <PokemonCard 
+                v-for="poke in displayedList" 
+                :key="poke.id" 
+                :pokemon="poke"
+                :isFavorite="favorites.has(poke.id)"
+                :isCaught="!!caught[poke.id]"
+                :displayNumber="selectedPokedex !== 'national' ? poke.entryNumber : null"
+                @click="openDetail"
+                @toggleFavorite="toggleFavorite"
+                @toggleCaught="toggleCaught"
+              />
+            </TransitionGroup>
           </div>
 
           <!-- Bottom trigger for infinite scroll load -->
@@ -567,6 +563,45 @@ const closeDetail = () => {
   border-radius: 50%;
   border: 3px solid var(--text-secondary);
   background-color: var(--bg-app);
+}
+
+/* Pokemon Grid positioning container for absolute transition layout */
+.pokemon-grid {
+  position: relative;
+}
+
+/* grid-list Vue TransitionGroup animation classes */
+.grid-list-enter-active,
+.grid-list-leave-active {
+  transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.grid-list-enter-from,
+.grid-list-leave-to {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.grid-list-move {
+  transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.grid-list-leave-active {
+  position: absolute !important;
+  width: 180px;
+  pointer-events: none;
+}
+
+@media (min-width: 640px) {
+  .grid-list-leave-active {
+    width: 210px;
+  }
+}
+
+@media (max-width: 639px) {
+  .grid-list-leave-active {
+    width: 160px;
+  }
 }
 
 @keyframes spin {
