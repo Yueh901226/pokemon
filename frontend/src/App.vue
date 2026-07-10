@@ -198,11 +198,17 @@ watch(selectedType2, async (newType) => {
 });
 
 // Watch filtering states to recalculate list
-watch([searchQuery, selectedGen, sortBy, showFavoritesOnly, showUncaughtOnly, selectedGame, selectedPokedex, selectedType, selectedType2, caught], () => {
+watch([searchQuery, selectedGen, sortBy, showFavoritesOnly, showUncaughtOnly, selectedGame, selectedPokedex, selectedType, selectedType2], () => {
   localStorage.setItem('pokedex_selected_gen', selectedGen.value);
   localStorage.setItem('pokedex_selected_sort', sortBy.value);
   localStorage.setItem('pokedex_selected_favorites', String(showFavoritesOnly.value));
   resetPagination();
+});
+
+// Reactively update current view on caught changes without page reset
+watch(caught, () => {
+  const count = currentPage.value * pageSize;
+  displayedList.value = finalFilteredList.value.slice(0, count);
 });
 
 // Core Filtering and Sorting Logic
@@ -396,12 +402,10 @@ const closeDetail = () => {
 };
 
 const beforeLeave = (el) => {
-  const rect = el.getBoundingClientRect();
-  const parentRect = el.parentNode.getBoundingClientRect();
-  el.style.left = `${rect.left - parentRect.left}px`;
-  el.style.top = `${rect.top - parentRect.top}px`;
-  el.style.width = `${rect.width}px`;
-  el.style.height = `${rect.height}px`;
+  el.style.left = `${el.offsetLeft}px`;
+  el.style.top = `${el.offsetTop}px`;
+  el.style.width = `${el.offsetWidth}px`;
+  el.style.height = `${el.offsetHeight}px`;
 };
 </script>
 
@@ -582,7 +586,7 @@ const beforeLeave = (el) => {
 /* grid-list Vue TransitionGroup animation classes */
 .grid-list-enter-active,
 .grid-list-leave-active {
-  transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: opacity 0.5s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
 }
 
 .grid-list-enter-from,
@@ -598,6 +602,7 @@ const beforeLeave = (el) => {
 .grid-list-leave-active {
   position: absolute !important;
   pointer-events: none;
+  transition: opacity 0.5s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
 }
 
 @keyframes spin {
