@@ -394,6 +394,15 @@ const openDetail = (id) => {
 const closeDetail = () => {
   selectedPokemonId.value = null;
 };
+
+const beforeLeave = (el) => {
+  const rect = el.getBoundingClientRect();
+  const parentRect = el.parentNode.getBoundingClientRect();
+  el.style.left = `${rect.left - parentRect.left}px`;
+  el.style.top = `${rect.top - parentRect.top}px`;
+  el.style.width = `${rect.width}px`;
+  el.style.height = `${rect.height}px`;
+};
 </script>
 
 <template>
@@ -431,7 +440,7 @@ const closeDetail = () => {
         <!-- Pokemon Grid List -->
         <div v-else class="pokemon-grid-container">
           <div class="pokemon-grid">
-            <TransitionGroup name="grid-list">
+            <TransitionGroup name="grid-list" @before-leave="beforeLeave">
               <PokemonCard 
                 v-for="poke in displayedList" 
                 :key="poke.id" 
@@ -588,20 +597,7 @@ const closeDetail = () => {
 
 .grid-list-leave-active {
   position: absolute !important;
-  width: 180px;
   pointer-events: none;
-}
-
-@media (min-width: 640px) {
-  .grid-list-leave-active {
-    width: 210px;
-  }
-}
-
-@media (max-width: 639px) {
-  .grid-list-leave-active {
-    width: 160px;
-  }
 }
 
 @keyframes spin {
