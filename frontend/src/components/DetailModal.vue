@@ -151,7 +151,7 @@ const cleanEnglishName = computed(() => {
 const playCry = () => {
   if (!details.value) return;
   const baseId = megaEvolutionList.find(m => m.id === details.value.id)?.baseId || details.value.id;
-  const cryUrl = details.value.cries || `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${baseId}.ogg`;
+  const cryUrl = details.value.cries || `https://cdn.jsdelivr.net/gh/PokeAPI/cries@main/cries/pokemon/latest/${baseId}.ogg`;
   
   const audio = new Audio(cryUrl);
   audio.volume = 0.5;
@@ -362,9 +362,9 @@ const handleDetailImageError = (e) => {
   if (isMega.value) {
     const megaInfo = megaEvolutionList.find(m => m.id === details.value.id);
     const fallbackId = details.value.id >= 100000 ? (megaInfo?.baseId || details.value.id % 100000) : details.value.id;
-    e.target.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${fallbackId}.png`;
+    e.target.src = `https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/other/official-artwork/${fallbackId}.png`;
   } else {
-    e.target.src = details.value.image || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${details.value.id}.png`;
+    e.target.src = details.value.image || `https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/other/official-artwork/${details.value.id}.png`;
   }
 };
 

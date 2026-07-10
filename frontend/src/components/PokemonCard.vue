@@ -79,9 +79,9 @@ const handleImageError = (e) => {
   }
   if (props.pokemon.isMega) {
     const fallbackId = props.pokemon.id >= 100000 ? (props.pokemon.baseId || props.pokemon.id % 100000) : props.pokemon.id;
-    e.target.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${fallbackId}.png`;
+    e.target.src = `https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/other/official-artwork/${fallbackId}.png`;
   } else {
-    e.target.src = props.pokemon.image || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${props.pokemon.id}.png`;
+    e.target.src = props.pokemon.image || `https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/other/official-artwork/${props.pokemon.id}.png`;
   }
 };
 

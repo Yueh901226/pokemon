@@ -29,6 +29,7 @@ const activePokedexList = ref(null);
 
 const favorites = ref(new Set());
 const caught = ref({});
+const pendingCaught = ref(new Set());
 const showUncaughtOnly = ref(false);
 const selectedPokemonId = ref(null);
 const theme = ref('dark');
@@ -107,8 +108,12 @@ watch(caughtStorageKey, () => {
 const toggleCaught = (id) => {
   if (caught.value[id]) {
     delete caught.value[id];
+    pendingCaught.value.delete(id);
   } else {
     caught.value[id] = true;
+    if (showUncaughtOnly.value) {
+      pendingCaught.value.add(id);
+    }
   }
   // Trigger reactivity
   caught.value = { ...caught.value };
@@ -198,7 +203,8 @@ watch(selectedType2, async (newType) => {
 });
 
 // Watch filtering states to recalculate list
-watch([searchQuery, selectedGen, sortBy, showFavoritesOnly, showUncaughtOnly, caught], () => {
+watch([searchQuery, selectedGen, sortBy, showFavoritesOnly, showUncaughtOnly, selectedGame, selectedPokedex, selectedType, selectedType2], () => {
+  pendingCaught.value.clear();
   localStorage.setItem('pokedex_selected_gen', selectedGen.value);
   localStorage.setItem('pokedex_selected_sort', sortBy.value);
   localStorage.setItem('pokedex_selected_favorites', String(showFavoritesOnly.value));
@@ -249,7 +255,7 @@ const finalFilteredList = computed(() => {
 
   // 5. Filter by Uncaught Only
   if (showUncaughtOnly.value) {
-    list = list.filter(p => !caught.value[p.id]);
+    list = list.filter(p => !caught.value[p.id] || pendingCaught.value.has(p.id));
   }
 
   // 5. Sorting

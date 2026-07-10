@@ -50,7 +50,7 @@ const createRegionalEntry = (id, baseId) => {
       baseId: baseId,
       name: `pokemon-${id}`,
       chineseName: pokemonChineseNames[id],
-      image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`
+      image: `https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/other/official-artwork/${id}.png`
     };
   }
 
@@ -74,7 +74,7 @@ const createRegionalEntry = (id, baseId) => {
     baseId: baseId,
     name: `pokemon-${id}`,
     chineseName: chineseName,
-    image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`
+    image: `https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/other/official-artwork/${id}.png`
   };
 };
 
@@ -235,7 +235,7 @@ export const fetchAllPokemonList = async (selectedGame = 'all') => {
         baseId: baseId,
         name: p.name,
         chineseName: chineseName,
-        image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${displayId}.png`,
+        image: `https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/other/official-artwork/${displayId}.png`,
         types: [] // Will be populated dynamically or via batch details
       };
     });
@@ -511,7 +511,7 @@ export const fetchEvolutionChain = async (url, selectedGame = 'all') => {
               id: nodeMapped.displayId,
               baseId: evolvedId,
               name: nodeMapped.name,
-              image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${nodeMapped.displayId}.png`,
+              image: `https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/other/official-artwork/${nodeMapped.displayId}.png`,
               condition: condition
             }];
             buildPaths(branch, newPath);
@@ -530,7 +530,7 @@ export const fetchEvolutionChain = async (url, selectedGame = 'all') => {
         id: nodeMapped.displayId,
         baseId: baseId,
         name: nodeMapped.name,
-        image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${nodeMapped.displayId}.png`,
+        image: `https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/other/official-artwork/${nodeMapped.displayId}.png`,
         condition: ''
       }]);
     });
@@ -599,7 +599,7 @@ export const fetchEvolutionChain = async (url, selectedGame = 'all') => {
                   id: specialId,
                   baseId: node.baseId,
                   name: displayName,
-                  image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${specialId}.png`,
+                  image: `https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/other/official-artwork/${specialId}.png`,
                   condition: condition
                 }
               ];
@@ -646,7 +646,7 @@ export const fetchPokemonByType = async (typeName) => {
       return {
         id,
         name: p.pokemon.name,
-        image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`
+        image: `https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/other/official-artwork/${id}.png`
       };
     }); // Removed filter(p => p.id <= 1025) to allow alternate forms to match types
 
@@ -666,7 +666,7 @@ export const fetchPokedex = async (pokedexName, selectedGame = 'all') => {
       name: p.name,
       chineseName: p.displayName,
       entryNumber: index + 1,
-      image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p.id >= 100000 ? p.baseId : p.id}.png`,
+      image: `https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/other/official-artwork/${p.id >= 100000 ? p.baseId : p.id}.png`,
       isMega: true,
       isMockMega: p.isMockMega,
       types: p.types
@@ -678,7 +678,7 @@ export const fetchPokedex = async (pokedexName, selectedGame = 'all') => {
       id: p.id,
       name: p.name,
       entryNumber: index + 1,
-      image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p.id}.png`
+      image: `https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/other/official-artwork/${p.id}.png`
     }));
   }
 
@@ -705,7 +705,7 @@ export const fetchPokedex = async (pokedexName, selectedGame = 'all') => {
       name: baseName,
       chineseName,
       entryNumber: entryNumber,
-      image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${displayId}.png`
+      image: `https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/other/official-artwork/${displayId}.png`
     };
   };
 
