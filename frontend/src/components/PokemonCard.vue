@@ -13,10 +13,6 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  isComparing: {
-    type: Boolean,
-    default: false
-  },
   displayNumber: {
     type: [Number, String],
     default: null
@@ -27,7 +23,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['click', 'toggleFavorite', 'toggleCompare', 'toggleCaught']);
+const emit = defineEmits(['click', 'toggleFavorite', 'toggleCaught']);
 
 const details = ref(null);
 const species = ref(null);
@@ -134,10 +130,7 @@ const handleFavorite = (e) => {
   emit('toggleFavorite', props.pokemon.id);
 };
 
-const handleCompare = (e) => {
-  e.stopPropagation();
-  emit('toggleCompare', props.pokemon);
-};
+
 
 const handleCaught = (e) => {
   e.stopPropagation();
@@ -158,16 +151,7 @@ const handleCaught = (e) => {
     <div class="card-header">
       <span class="pokemon-id">{{ formattedId }}</span>
       <div class="card-actions">
-        <!-- Compare button -->
-        <button 
-          class="btn-action btn-compare"
-          :class="{ 'active': isComparing }"
-          @click="handleCompare"
-          title="加入比較"
-        >
-          <span v-if="isComparing">✓</span>
-          <span v-else>+</span>
-        </button>
+
 
         <!-- Favorite button -->
         <button 

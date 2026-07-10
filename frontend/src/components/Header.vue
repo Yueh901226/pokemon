@@ -11,7 +11,6 @@ const props = defineProps({
   showFavoritesOnly: Boolean,
   showUncaughtOnly: Boolean,
   theme: String,
-  compareCount: Number,
   selectedGame: String,
   selectedPokedex: String
 });
@@ -26,8 +25,7 @@ const emit = defineEmits([
   'update:showUncaughtOnly',
   'update:selectedGame',
   'update:selectedPokedex',
-  'toggleTheme',
-  'toggleCompare'
+  'toggleTheme'
 ]);
 
 const selectType = (typeKey) => {
@@ -147,14 +145,10 @@ const selectPokedex = (pokedexValue) => {
               class="btn-uncaught-toggle"
               :class="{ 'active': showUncaughtOnly }"
             >
-              <span>{{ showUncaughtOnly ? '✓ 未收服篩選中' : '○ 未收服' }}</span>
+              <span>{{ showUncaughtOnly ? '✓ 未收服' : '○ 未收服' }}</span>
             </button>
 
-            <!-- Compare drawer toggle -->
-            <button @click="emit('toggleCompare')" class="btn-compare-toggle">
-              <span>對比</span>
-              <span class="compare-badge" v-if="compareCount > 0">{{ compareCount }}</span>
-            </button>
+
 
             <!-- Theme toggler -->
             <button @click="emit('toggleTheme')" class="btn-theme-toggle" aria-label="切換主題">
@@ -279,9 +273,10 @@ const selectPokedex = (pokedexValue) => {
 
 @media (min-width: 1024px) {
   .header-container {
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    justify-content: space-between;
+    gap: 24px;
   }
 }
 
@@ -289,6 +284,12 @@ const selectPokedex = (pokedexValue) => {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+@media (min-width: 1024px) {
+  .logo-section {
+    justify-self: start;
+  }
 }
 
 .pokeball-icon {
@@ -330,6 +331,12 @@ const selectPokedex = (pokedexValue) => {
   flex-shrink: 0;
 }
 
+@media (min-width: 1024px) {
+  .controls-panel {
+    justify-self: end;
+  }
+}
+
 .controls-panel::-webkit-scrollbar {
   display: none; /* Hide scrollbar for Chrome/Safari */
 }
@@ -337,13 +344,13 @@ const selectPokedex = (pokedexValue) => {
 .search-wrapper {
   position: relative;
   flex-grow: 1;
-  max-width: 480px;
-  width: 100%;
+  width: 500px;
+  max-width: 100%;
 }
 
 @media (min-width: 1024px) {
   .search-wrapper {
-    margin: 0 32px;
+    justify-self: center;
   }
 }
 
@@ -454,6 +461,7 @@ const selectPokedex = (pokedexValue) => {
 .btn-uncaught-toggle {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   padding: 12px 16px;
   border-radius: 12px;
@@ -464,6 +472,7 @@ const selectPokedex = (pokedexValue) => {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s;
+  min-width: 108px;
 }
 
 .btn-uncaught-toggle:hover {

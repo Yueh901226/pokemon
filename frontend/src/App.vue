@@ -6,7 +6,6 @@ import { pokemonChineseNames } from './utils/pokemonNames';
 import Header from './components/Header.vue';
 import PokemonCard from './components/PokemonCard.vue';
 import DetailModal from './components/DetailModal.vue';
-import ComparisonDrawer from './components/ComparisonDrawer.vue';
 import Loader from './components/Loader.vue';
 
 // State Management
@@ -31,8 +30,6 @@ const activePokedexList = ref(null);
 const favorites = ref(new Set());
 const caught = ref({});
 const showUncaughtOnly = ref(false);
-const compareList = ref([]);
-const isCompareOpen = ref(false);
 const selectedPokemonId = ref(null);
 const theme = ref('dark');
 
@@ -127,29 +124,7 @@ const toggleFavorite = (id) => {
   localStorage.setItem('pokedex_favorites', JSON.stringify(Array.from(favorites.value)));
 };
 
-// Comparison Management
-const toggleCompare = (pokemon) => {
-  const exists = compareList.value.findIndex(p => p.id === pokemon.id);
-  if (exists !== -1) {
-    compareList.value.splice(exists, 1);
-  } else {
-    if (compareList.value.length >= 2) {
-      // Replace the second one or show warning. Let's replace the second one
-      compareList.value.splice(1, 1, pokemon);
-    } else {
-      compareList.value.push(pokemon);
-    }
-    // Auto open drawer when a Pokemon is added
-    isCompareOpen.value = true;
-  }
-};
 
-const removeFromCompare = (id) => {
-  const index = compareList.value.findIndex(p => p.id === id);
-  if (index !== -1) {
-    compareList.value.splice(index, 1);
-  }
-};
 
 // Game and Pokedex Loading Handler
 watch([selectedGame, selectedPokedex], async () => {
@@ -435,10 +410,8 @@ const closeDetail = () => {
       v-model:selectedGame="selectedGame"
       v-model:selectedPokedex="selectedPokedex"
       :theme="theme"
-      :compareCount="compareList.length"
       :style="headerStyle"
       @toggleTheme="toggleTheme"
-      @toggleCompare="isCompareOpen = !isCompareOpen"
     />
 
     <!-- Main Content Container -->
@@ -463,12 +436,10 @@ const closeDetail = () => {
               :key="poke.id" 
               :pokemon="poke"
               :isFavorite="favorites.has(poke.id)"
-              :isComparing="compareList.some(p => p.id === poke.id)"
               :isCaught="!!caught[poke.id]"
               :displayNumber="selectedPokedex !== 'national' ? poke.entryNumber : null"
               @click="openDetail"
               @toggleFavorite="toggleFavorite"
-              @toggleCompare="toggleCompare"
               @toggleCaught="toggleCaught"
             />
           </div>
@@ -493,14 +464,6 @@ const closeDetail = () => {
       :selectedGame="selectedGame"
       @close="closeDetail"
       @selectPokemon="openDetail"
-    />
-
-    <!-- Comparison drawer panel -->
-    <ComparisonDrawer 
-      :isOpen="isCompareOpen" 
-      :compareList="compareList"
-      @close="isCompareOpen = false"
-      @removePokemon="removeFromCompare"
     />
   </div>
 </template>
