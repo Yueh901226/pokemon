@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import { fetchPokemonDetails, fetchPokemonSpecies } from '../utils/pokeapi';
-import { typeTranslations, capitalize } from '../utils/helpers';
+import { typeTranslations, capitalize, bdspExclusives } from '../utils/helpers';
 import { pokemonChineseNames } from '../utils/pokemonNames';
 
 const props = defineProps({
@@ -20,7 +20,17 @@ const props = defineProps({
   isCaught: {
     type: Boolean,
     default: false
+  },
+  selectedGame: {
+    type: String,
+    default: ''
   }
+});
+
+const exclusiveVersion = computed(() => {
+  if (props.selectedGame !== 'bdsp') return null;
+  const lookupId = props.pokemon.baseId || props.pokemon.id;
+  return bdspExclusives[lookupId] || null;
 });
 
 const emit = defineEmits(['click', 'toggleFavorite', 'toggleCaught']);
@@ -149,7 +159,12 @@ const handleCaught = (e) => {
 
     <!-- Top card info (ID and Buttons) -->
     <div class="card-header">
-      <span class="pokemon-id">{{ formattedId }}</span>
+      <div class="id-wrapper">
+        <span class="pokemon-id">{{ formattedId }}</span>
+        <span v-if="exclusiveVersion" class="exclusive-badge" :class="exclusiveVersion">
+          {{ exclusiveVersion === 'diamond' ? '鑽石' : '珍珠' }}
+        </span>
+      </div>
       <div class="card-actions">
 
 
@@ -457,5 +472,34 @@ const handleCaught = (e) => {
   background: rgba(220, 80, 80, 0.15);
   border-color: rgba(220, 80, 80, 0.5);
   color: #e05555;
+}
+
+.id-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.exclusive-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+  text-shadow: none;
+}
+
+.exclusive-badge.diamond {
+  background-color: rgba(58, 134, 255, 0.15);
+  color: #3a86ff;
+  border: 1px solid rgba(58, 134, 255, 0.35);
+  box-shadow: 0 0 6px rgba(58, 134, 255, 0.1);
+}
+
+.exclusive-badge.pearl {
+  background-color: rgba(255, 71, 126, 0.15);
+  color: #ff477e;
+  border: 1px solid rgba(255, 71, 126, 0.35);
+  box-shadow: 0 0 6px rgba(255, 71, 126, 0.1);
 }
 </style>

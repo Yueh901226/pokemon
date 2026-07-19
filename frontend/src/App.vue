@@ -451,6 +451,7 @@ const beforeLeave = (el) => {
                 :pokemon="poke"
                 :isFavorite="favorites.has(poke.id)"
                 :isCaught="!!caught[poke.id]"
+                :selectedGame="selectedGame"
                 :displayNumber="selectedPokedex !== 'national' ? poke.entryNumber : null"
                 @click="openDetail"
                 @toggleFavorite="toggleFavorite"

@@ -263,3 +263,48 @@ export const gamePokedexConfig = [
 ];
 
 export const megaEvolutionList = verifiedMegaList;
+
+export const bdspExclusives = {
+  // Diamond
+  10: 'diamond', 11: 'diamond', 12: 'diamond',
+  23: 'diamond', 24: 'diamond',
+  58: 'diamond', 59: 'diamond',
+  86: 'diamond', 87: 'diamond',
+  123: 'diamond', 212: 'diamond',
+  125: 'diamond', 239: 'diamond', 466: 'diamond',
+  198: 'diamond', 430: 'diamond',
+  207: 'diamond', 472: 'diamond',
+  243: 'diamond', 244: 'diamond', 245: 'diamond',
+  246: 'diamond', 247: 'diamond', 248: 'diamond',
+  250: 'diamond',
+  273: 'diamond', 274: 'diamond', 275: 'diamond',
+  303: 'diamond',
+  335: 'diamond',
+  338: 'diamond',
+  352: 'diamond',
+  408: 'diamond', 409: 'diamond',
+  434: 'diamond', 435: 'diamond',
+  483: 'diamond',
+
+  // Pearl
+  13: 'pearl', 14: 'pearl', 15: 'pearl',
+  27: 'pearl', 28: 'pearl',
+  37: 'pearl', 38: 'pearl',
+  79: 'pearl', 80: 'pearl', 199: 'pearl',
+  127: 'pearl',
+  126: 'pearl', 240: 'pearl', 467: 'pearl',
+  200: 'pearl', 429: 'pearl',
+  234: 'pearl',
+  144: 'pearl', 145: 'pearl', 146: 'pearl',
+  249: 'pearl',
+  216: 'pearl', 217: 'pearl',
+  371: 'pearl', 372: 'pearl', 373: 'pearl',
+  270: 'pearl', 271: 'pearl', 272: 'pearl',
+  302: 'pearl',
+  336: 'pearl',
+  337: 'pearl',
+  410: 'pearl', 411: 'pearl',
+  431: 'pearl', 432: 'pearl',
+  484: 'pearl'
+};
+
