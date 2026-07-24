@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "sync": "git add .. && git commit -m \"Auto update code and deploy\" && git push origin master && npm run deploy"
   },
   "dependencies": {
     "jsdom": "^29.1.1",
